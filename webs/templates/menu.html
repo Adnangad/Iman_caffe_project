@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Product Page</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}?cache_id={{ cache_id }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+    <script>
+      $(document).ready(function() {
+        {% if user %}
+        const temp = '<li><a href="/cart" class="iconz" id="cart"><i class="fa-solid fa-cart-shopping"></i> Cart</a></li>';
+        $('#log').parent().replaceWith(temp);
+        const greet = '<li><a href="/user" class="iconz" id="user"><i class="fa-solid fa-user"></i>Hi {{ user.name }}</a></li>'
+        $('#home').parent().replaceWith(greet)
+        {% endif %}
+      });
+
+      function add_to_db(productName, productPrice, productImage) {
+        fetch("/add_to_cart", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            item: productName,
+            price: productPrice,
+            image: productImage,
+          }),
+        })
+        .then((response) => {
+          if (response.ok) {
+            return response.json();
+          }
+          throw new Error("Network response was not ok.");
+        })
+        .then((data) => {
+          const addButton = $(document)
+            .find('.item:contains("' + productName + '")')
+            .siblings(".cart");
+          addButton.remove();
+        })
+        .catch((error) => {
+          console.error("There was a problem with the fetch operation:", error);
+        });
+      }
+    </script>
+  </head>
+  <body>
+    <header>
+      <div class="logo"></div>
+      <section class="info">
+        <ul class="navbar">
+          <li><a href="/" id="home"><i class="fa-solid fa-house"></i>Home</a></li>
+          <li><a href="index.html">Menu</a></li>
+          <li><a href="#contacts">Contact us</a></li>
+          <li><a href="/login" class="icn" id="log">Login</a></li>
+        </ul>
+      </section>
+    </header>
+    <div class="content">
+      {% for stock in stocks %}
+      <div class="product">
+        <img src="{{ url_for('static', filename=stock.image) }}" alt="{{ stock.product }}">
+        <h2 class="item">{{ stock.product }}</h2>
+        <p>{{ stock.description }}</p>
+        <h6 class="price">{{ stock.value }}</h6>
+        <p>{{ stock.category }}</p>
+        <button id="cartButton" class="cart" onclick="add_to_db('{{ stock.product }}', '{{ stock.value }}', '{{ stock.image }}')">Add to cart</button>
+      </div>
+      {% endfor %}
+    </div>
+  </body>
+</html>
