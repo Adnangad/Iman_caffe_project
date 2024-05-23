@@ -5,6 +5,7 @@ from models.user import User
 from models.cart import Cart
 from models.stock import Stock
 from models.area import Area
+import os
 
 classes = {"User": User, "Cart": Cart, "Stock": Stock, "Area": Area}
 
@@ -14,12 +15,12 @@ class DBStorage:
     
     def __init__(self):
         """creates engine and instanciates"""
-        user = 'gard'
-        hst = 'localhost'
-        paswd = 'shop'
-        db = 'online_shop'
+        user = os.getenv('DB_USER')
+        password = os.getenv('DB_PASS')
+        host = os.getenv('DB_HOST')
+        db = os.getenv('DB_NAME')
         
-        self.__engine = create_engine(f'mysql+mysqldb://{user}:{paswd}@{hst}/{db}')
+        self.__engine = create_engine(f'mysql+mysqldb://{user}:{password}@{host}/{db}')
     
     def all(self, cls=None):
         """Lists all objects in db"""
@@ -67,9 +68,9 @@ class DBStorage:
     def reload(self):
         """Reloads the db"""
         Base.metadata.create_all(self.__engine)
-        sess = sessionmaker(bind=self.__engine, expire_on_commit=False)
-        Session = scoped_session(sess)
-        self.__session = Session 
+        session_factory = sessionmaker(bind=self.__engine, expire_on_commit=False)
+        Session = scoped_session(session_factory)
+        self.__session = Session()
     
     def close(self):
         """call remove() method on the private session attribute"""
