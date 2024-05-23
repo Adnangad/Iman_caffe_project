@@ -5,6 +5,7 @@ from models.area import Area
 from models.stock import Stock
 from models.cart import Cart
 from uuid import uuid4
+import os
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here' 
@@ -127,4 +128,5 @@ def show_cart():
 
 if __name__ == '__main__':
     storage.reload()
-    app.run(port=5000, debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port, debug=True)
