@@ -126,4 +126,5 @@ def show_cart():
     return render_template('cart.html', user=user, carts=final, cache_id=cache_id, total_price=total_price)
 
 if __name__ == '__main__':
-    app.run(port=5001, debug=True)
+    storage.reload()
+    app.run(port=5000, debug=True)
