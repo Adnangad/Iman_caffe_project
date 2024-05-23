@@ -12,7 +12,7 @@ cache_id = uuid4()
 
 @app.route("/", strict_slashes=False)
 def index():
-    return render_template("home_page.html", cache_id=cache_id)
+    return render_template("index.html", cache_id=cache_id)
 
 @app.route("/location", methods=['POST'])
 def check_Area():
@@ -25,7 +25,7 @@ def check_Area():
         if loc == a.name:
             return render_template('menu.html', cache_id=cache_id)
     message = "Sorry but we currently don't do deliveries in that location"
-    return render_template('home_page.html', cache_id=cache_id, message=message)
+    return render_template('index.html', cache_id=cache_id, message=message)
 
 @app.route("/login", methods=["POST"])
 def sign_in():
