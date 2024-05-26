@@ -1,5 +1,7 @@
-from models.user import User
+from models.stock import Stock
 from models import storage
-user = User(name='Gard', email='adnanobuya@gmail.com', password='ndozi', location='Kisumu')
-storage.new(user)
+import os
+
+stock = Stock(product='chips', value=200, description='A plate of chips', image='images/chips.jpg', category='Foods')
+storage.new(stock)
 storage.save()

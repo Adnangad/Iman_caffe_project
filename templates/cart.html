@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Product Page</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/style.css') }}?cache_id={{ cache_id }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles/checkout.css') }}?cache_id={{ cache_id }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
           integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
           crossorigin="anonymous" referrerpolicy="no-referrer"/>
@@ -29,12 +29,11 @@
                         const item = product.querySelector('#item').textContent.trim();
                         const price = product.querySelector('#price').textContent.trim();
                         const image_path = product.querySelector('#image').src.trim();
-                        const image_p = new URL(image_path).pathname
+                        const image_p = new URL(image_path).pathname;
                         const image = image_p.split('/static/')[1];
                         newButton.setAttribute('onclick', `add_to_db('${item}', '${price}', '${image}')`);
                         var parent = cartButton.parentNode;
                         parent.replaceChild(newButton, cartButton);
-                        location.reload()
                     }
                 });
             });
@@ -53,18 +52,34 @@
     </script>
 </head>
 <body>
-    <h3>Subtotal: {{ total_price }}</h3>
-    <div class="content">
-        {% for cart in carts %}
-        <div class="product">
-            <img src="{{ url_for('static', filename=cart.image) }}" alt="{{ cart.item }}" id="image">
-            <h2 class="item" id="item">{{ cart.item }}</h2>
-            <h6 class="price" id="price">{{ cart.price }}</h6>
-            <p id="cart_id" style="display: none;">{{ cart.id }}</p>
-            <button id="cartButton" class="cart">Remove from cart</button>
+    <header></header>
+    <div class="cart_menu">
+        <div class="content">
+            {% for cart in carts %}
+            <div class="product">
+                <img src="{{ url_for('static', filename=cart.image) }}" alt="{{ cart.item }}" id="image">
+                <h2 class="item" id="item">{{ cart.item }}</h2>
+                <h6 class="price" id="price">{{ cart.price }}</h6>
+                <p id="cart_id" style="display: none;">{{ cart.id }}</p>
+                <button id="cartButton" class="cart">Remove from cart</button>
+            </div>
+            {% endfor %}
+            <h3>Subtotal: {{ total_price }}</h3>
         </div>
-        {% endfor %}
     </div>
-    <button id="checkout" style="float: right;margin-right: 100px;" action="/checkout">Checkout</button>
+    <div class="payment_menu">
+        <div class="mpesa_image">
+            <img src="../static/images/mpesa.png" alt="mpesa_logo">
+        </div>
+        <div class="form">
+            <form action="/payment" method="post">
+                <label for="phone">Phone Number:</label>
+                <input type="number" name="phone" required placeholder="Please Enter your Phone number" class="pay"><br/>
+                <label for="name">First Name :</label>
+                <input type="text" name="name" required placeholder="Please Enter your name" class="pay"><br/>
+                <button type="submit" class="payButton">Checkout</button>
+            </form>
+        </div>
+    </div>
 </body>
 </html>

@@ -1,0 +1,99 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: #293040;
+  padding: 0;
+}
+header {
+  background-color: #d5b263;
+  width: 100%;
+  height: 120px;
+  display: flex;
+  align-items: center;
+}
+.logo {
+  width: 150px;
+  height: 125px;
+  background: url("../icons/iman-caffe-high-resolution-logo\ \(1\).png");
+  padding-left: 30px;
+  margin-left: 100px;
+  background-size: contain;
+}
+.info ul {
+  list-style-type: none;
+  overflow: hidden;
+  margin-left: 350px;
+  justify-content: center;
+  align-items: center;
+}
+.info ul li {
+  float: left;
+}
+
+li a {
+  display: block;
+  color: #333;
+  text-align: center;
+  text-decoration: none;
+  font-size: 25px;
+  margin-left: 50px;
+}
+li a:hover {
+  color: black;
+}
+.login {
+  width: 100px;
+  text-align: center;
+}
+.login a {
+  margin-top: auto;
+  margin-bottom: auto;
+}
+.login_icon {
+  margin-left: auto;
+  margin-right: auto;
+  height: 20px;
+  width: 20px;
+  background: url("../icons/user-solid.svg") no-repeat center;
+}
+.itemdisplay {
+  display: flex;
+  background: rgba(0, 0, 0, 0.5);
+  width: 100%;
+  height: 550px;
+}
+.itemdisplay img {
+  width: 500px;
+  height: auto;
+  float: left;
+  margin-right: 200px;
+}
+.item_info {
+  font-size: 25px;
+  color: white;
+  float: left;
+}
+.item_name {
+  font-size: 35px;
+  border-bottom: 1px solid black;
+  padding-bottom: 35px;
+  text-transform: capitalize !important;
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+.description {
+  color: silver;
+}
+.cartButton {
+  color: #293040;
+  background-color: #d5b263;
+  font-size: 20px;
+  width: 350px;
+  height: 35px;
+  border-radius: 12px;
+  border: 2px solid black;
+  cursor: pointer;
+}
+#checkout {
+  margin-top: 30px;
+  width: 200px;
+}

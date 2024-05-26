@@ -1,0 +1,127 @@
+body {
+  margin: 0;
+  font-family: sans-serif;
+  background: white;
+  padding: 0;
+}
+header {
+  background-color: #d5b263;
+  width: 100%;
+  height: 120px;
+}
+.cart_menu {
+  float: right;
+  display: flex;
+  width: 52%;
+  height: auto;
+  border: 1px solid black;
+  border-radius: 40px;
+  margin-top: 3px;
+  margin-right: 2px;
+}
+.payment_menu {
+  float: left;
+  width: 46%;
+  height: auto;
+  border: 1px solid black;
+  margin-top: 3px;
+  margin-left: 2px;
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 20px;
+  
+}
+.mpesa_image {
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  text-align: center;
+}
+.form {
+  width: 100%;
+  margin-top: 20px;
+  text-align: center;
+}
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: -10px 50px 0 0;
+}
+.product {
+  width: 20%;
+  margin: 15px;
+  box-sizing: border-box;
+  float: left;
+  text-align: center;
+  border-radius: 20px;
+  padding-top: 10px;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  transition: 0.5s;
+  background: #293040;
+}
+.product:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  transform: translate(0px, -8px);
+}
+img {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  height: 200px;
+  display: block;
+  border-radius: 20px;
+}
+h2 {
+  text-align: center;
+  padding-top: 0 8px;
+  color: white;
+}
+p {
+  margin-top: 2px;
+  color: white;
+}
+h6 {
+  font-size: 23px;
+  text-align: center;
+  color: navajowhite;
+  margin: 0;
+}
+#price {
+  text-align: left;
+}
+button {
+  border-radius: 12px;
+  color: #333;
+  background-color: #d5b263;
+  width: 95px;
+  height: 30px;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 8px;
+}
+.payButton {
+  border-radius: 12px;
+  color: #293040;
+  background-color: #d5b263;
+  width: 150px;
+  height: 35px;
+  cursor: pointer;
+  border: none;
+  margin-top: 20px;
+  float: right;
+}
+.pay {
+    width: 450px;
+    margin-top: 20px;
+    height: 40px;
+    border-radius: 10px;
+}
+label {
+    font-size: 20px;
+}
