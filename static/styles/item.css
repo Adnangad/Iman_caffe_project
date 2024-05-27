@@ -97,3 +97,70 @@ li a:hover {
   margin-top: 30px;
   width: 200px;
 }
+.content {
+  display: flex;
+  flex-wrap: wrap;
+  width: 100%;
+  justify-content: center;
+  align-items: center;
+  margin: 10px 50px 0 0;
+  background-color: #D5B263;
+  
+}
+.product {
+  width: 20%;
+  margin: 15px;
+  box-sizing: border-box;
+  float: left;
+  text-align: center;
+  border-radius: 20px;
+  padding-top: 10px;
+  cursor: pointer;
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
+  transition: 0.5s;
+  background: #293040;
+}
+.product:hover {
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
+  transform: translate(0px, -8px);
+}
+
+img {
+  width: 100%;
+  margin: 0 auto;
+  text-align: center;
+  height: 200px;
+  display: block;
+  border-radius: 20px;
+}
+
+h2 {
+  text-align: center;
+  padding-top: 0 8px;
+  color: white;
+}
+
+p {
+  margin-top: 2px;
+  color: white;
+}
+
+h6 {
+  font-size: 23px;
+  text-align: center;
+  color: navajowhite;
+  margin: 0;
+}
+#price {
+  text-align: left;
+}
+.cart {
+  border-radius: 12px;
+  color: #333;
+  background-color: #D5B263;
+  width: 95px;
+  height: 30px;
+  cursor: pointer;
+  border: none;
+  margin-bottom: 8px;
+}

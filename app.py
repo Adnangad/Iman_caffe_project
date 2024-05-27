@@ -6,6 +6,7 @@ from models.stock import Stock
 from models.cart import Cart
 from uuid import uuid4
 import os
+from collections import defaultdict
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key_here' 
@@ -18,15 +19,14 @@ def index():
 @app.route("/location", methods=['POST'])
 def check_Area():
     area = storage.all(Area).values()
-    loc = request.form['area']
-    if not loc:
-        message = 'Please Enter a location'
-        return render_template('menu.html', cache_id=cache_id, message=message)
+    data = request.get_json()
+    if not data:
+        return jsonify({'message': 'Please enter a valid location'}), 400
+    loc = data.get('area') 
     for a in area:
         if loc == a.name:
-            return render_template('menu.html', cache_id=cache_id)
-    message = "Sorry but we currently don't do deliveries in that location"
-    return render_template('index.html', cache_id=cache_id, message=message)
+            return jsonify({'message': 'We do deliver in that location'}), 200
+    return jsonify({'message': 'Sorry but we are not yet available in that location'}), 400
 
 @app.route("/login", methods=["POST"])
 def sign_in():
@@ -109,27 +109,50 @@ def get_menu():
 @app.route('/checkitem/<stock_id>')
 def check_item(stock_id):
     stock = storage.get(Stock, stock_id)
+    stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
     if 'user_id' not in session:
         return render_template('item.html', stock=stock)
     user_id = session['user_id']
     user = storage.get(User, user_id)
-    return render_template('item.html', stock=stock, user=user)
+    return render_template('item.html', stock=stock, user=user, stocks=stocks)
 
 
 @app.route("/cart", methods=["GET"])
 def show_cart():
     if 'user_id' not in session:
         return jsonify({'message': 'Please login.'}), 401
+    
     user_id = session['user_id']
     user = storage.get(User, user_id)
     carts = sorted(list(storage.all(Cart).values()), key=lambda x: x.item)
-    final = []
+    
+    grouped_carts = defaultdict(lambda: {'count': 0, 'details': {}})
     total_price = 0
+
     for cart in carts:
         if cart.user_id == user.id:
-            total_price = total_price + float(cart.price)
-            final.append(cart)
-    return render_template('cart.html', user=user, carts=final, cache_id=cache_id, total_price=total_price)
+            item_name = cart.item
+            grouped_carts[item_name]['count'] += 1
+            grouped_carts[item_name]['details'] = cart
+            total_price += float(cart.price)
+    
+    return render_template('cart.html', user=user, grouped_carts=grouped_carts, cache_id=cache_id, total_price=total_price)
 
+@app.route('/user/', methods=['GET'])
+def user_info():
+    if 'user_id' not in session:
+        return jsonify({'message': 'User does not exist'}), 400
+    user_id = session['user_id']
+    user = storage.get(User, user_id)
+    return render_template('user.html', user=user)
+
+@app.route('/logout', methods=['GET'])
+def log_out():
+    if 'user_id' not in session:
+        return jsonify({'message': 'User does not exist'}), 400
+    del(session['user_id'])
+    return render_template('index.html', cache_id=cache_id)
+    
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
+    port = int(os.environ.get('PORT', 5000))
+    app.run(host='0.0.0.0', port=port)

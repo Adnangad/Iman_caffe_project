@@ -1,29 +1,57 @@
 body {
   margin: 0;
-  font-family: sans-serif;
-  background: white;
   padding: 0;
+  background-color: #293040;
 }
 header {
-  background-color: #d5b263;
+  background-color: #D5B263;
   width: 100%;
   height: 120px;
+  display: flex;
+  align-items: center;
+}
+.logo {
+  width: 150px;
+  height: 125px;
+  background: url("../icons/iman-caffe-high-resolution-logo\ \(1\).png");
+  padding-left: 30px;
+  margin-left: 100px;
+  background-size: contain;
+}
+.navbarContent {
+  list-style-type: none;
+  overflow: hidden;
+  margin-left: 350px;
+  align-items: center;
+  justify-content: center;
+}
+.navbarContent li {
+  float: left;
+}
+.navbarContent li a {
+  display: block;
+  text-decoration: none;
+  color: #293040;
+  font-size: 30px;
+  margin-left: 100px;
+}
+.navbarContent li a:hover {
+  color: black;
 }
 .cart_menu {
   float: right;
   display: flex;
   width: 52%;
   height: auto;
-  border: 1px solid black;
-  border-radius: 40px;
+  border: 1px solid #d5b263;
+  border-top: none;
   margin-top: 3px;
   margin-right: 2px;
 }
 .payment_menu {
   float: left;
-  width: 46%;
+  width: 45%;
   height: auto;
-  border: 1px solid black;
   margin-top: 3px;
   margin-left: 2px;
   border-radius: 10px;
@@ -31,7 +59,6 @@ header {
   flex-direction: column;
   align-items: center;
   padding-top: 20px;
-  
 }
 .mpesa_image {
   justify-content: center;
@@ -117,11 +144,18 @@ button {
   float: right;
 }
 .pay {
-    width: 450px;
-    margin-top: 20px;
-    height: 40px;
-    border-radius: 10px;
+  width: 450px;
+  margin-top: 20px;
+  height: 40px;
+  border-radius: 10px;
 }
 label {
-    font-size: 20px;
+  font-size: 20px;
+}
+.amount {
+  float: right;
+  margin-right: 100px;
+  color: white;
+  font-size: 30px;
+  margin-top: -10px;
 }

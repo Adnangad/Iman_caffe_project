@@ -7,6 +7,8 @@
     <style>
         .error { color: red; }
         .success { color: green; }
+        .popup { display: none; }
+        .popup.show { display: block; }
     </style>
 </head>
 <body>
@@ -31,26 +33,26 @@
                                 <input type="password" id="password" name="password" placeholder="Enter Password" required class="input_bar" />
                                 <input type="submit" value="Sign in" class="search" />
                             </form>
-                            <div id="responseMessage"></div> <!-- Moved this inside the popup content -->
+                            <div id="responseMessage"></div>
                         </div>
                     </div>
                 </li>
                 <li>
-                    <a href="#sign_in" id="sign_up">Sign_up</a>
+                    <a href="#sign_in" id="sign_up">Sign up</a>
                     <div id="mysignPopup" class="popup">
                         <div class="popup-content">
                             <button id="ClosesignPopup">Close</button>
                             <p>Welcome</p>
-                            <p>Please Sign in to continue shopping from our Menu</p>
+                            <p>Please Sign up to continue shopping from our Menu</p>
                             <form id="signupForm">
                                 <label for="name">Name:</label>
-                                <input type="text" id ='name' name="name" placeholder="Enter Your name" required class="input_bar" /><br />
+                                <input type="text" id='name' name="name" placeholder="Enter Your name" required class="input_bar" /><br />
                                 <label for="email">Email:</label>
-                                <input type="text" id ='email1' name="email" placeholder="Enter Your Email Address" required class="input_bar"/><br/>
+                                <input type="text" id='email1' name="email" placeholder="Enter Your Email Address" required class="input_bar" /><br />
                                 <label for="passwd">Password:</label>
                                 <input type="password" id='password1' name="password" placeholder="Enter A Password" required class="input_bar" /><br />
                                 <label for="location">Location:</label>
-                                <input type="text" id='location' name="location" placeholder="Enter Your current location" required class="input_bar"/>
+                                <input type="text" id='location' name="location" placeholder="Enter Your current location" required class="input_bar" />
                                 <input type="submit" value="Sign up" class="search" />
                             </form>
                             <div id="sign_upMessage"></div>
@@ -64,10 +66,11 @@
         <div class="container">
             <p class="slogan"><b>Where every flavor tells a story</b></p>
             <div class="search_bar">
-                <form action="/location" method="post">
-                    <input type="text" name="area" placeholder="Enter your location" class="location_search" />
+                <form id="locationForm" action="/location" method="post">
+                    <input type="text" id='area' name="area" placeholder="Enter your location" class="location_search" />
                     <button class="search">Search</button>
                 </form>
+                <div id='locationmessage'  style="font-size: 25px;"></div>
             </div>
         </div>
     </section>
@@ -105,13 +108,14 @@
             const myPopup = document.getElementById("myPopup");
             const ClosePopup = document.getElementById("ClosePopup");
             const sign_up = document.getElementById("sign_up");
-            const mysignPopup = document.getElementById("mysignPopup")
-            const ClosesignPopup = document.getElementById("ClosesignPopup")
+            const mysignPopup = document.getElementById("mysignPopup");
+            const ClosesignPopup = document.getElementById("ClosesignPopup");
 
             log_in.addEventListener("click", function (event) {
                 event.preventDefault();
                 myPopup.classList.add("show");
             });
+
             sign_up.addEventListener("click", function (event) {
                 event.preventDefault();
                 mysignPopup.classList.add("show");
@@ -120,17 +124,16 @@
             ClosePopup.addEventListener("click", function () {
                 myPopup.classList.remove("show");
             });
+
             ClosesignPopup.addEventListener("click", function () {
                 mysignPopup.classList.remove("show");
             });
 
             window.addEventListener("click", function (event) {
-                if (event.target == myPopup) {
+                if (event.target === myPopup) {
                     myPopup.classList.remove("show");
                 }
-            });
-            window.addEventListener("click", function (event) {
-                if (event.target == mysignPopup) {
+                if (event.target === mysignPopup) {
                     mysignPopup.classList.remove("show");
                 }
             });
@@ -150,36 +153,54 @@
             if (response.status === 200) {
                 messageElement.textContent = data.message;
                 messageElement.className = 'success';
-                window.location.href=`/menu?user_id=${data.user.id}`
+                window.location.href = `/menu?user_id=${data.user.id}`;
             } else {
                 messageElement.textContent = data.message;
                 messageElement.className = 'error';
             }
         });
-        document.getElementById('signupForm').addEventListener('submit', async function (e) {
-          e.preventDefault();
-          const email = document.getElementById('email1').value;
-          const password = document.getElementById('password1').value;
-          const name = document.getElementById('name').value;
-          const location = document.getElementById('location').value;
-          const response = await fetch('/sign_up', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({email: email, password: password, name:name, location:location})
-          });
-          const data = await response.json();
-          const messageElement = document.getElementById('sign_upMessage');
-          if (response.status === 200) {
-            messageElement.textContent = data.message;
-            messageElement.className = 'success';
-            window.location.href = `#login`
-          }
-          else {
-            messageElement.textContent = data.message;
-            messageElement.className = 'error';
-          }
 
-        })
+        document.getElementById('signupForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const email = document.getElementById('email1').value;
+            const password = document.getElementById('password1').value;
+            const name = document.getElementById('name').value;
+            const location = document.getElementById('location').value;
+            const response = await fetch('/sign_up', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: email, password: password, name: name, location: location })
+            });
+            const data = await response.json();
+            const messageElement = document.getElementById('sign_upMessage');
+            if (response.status === 200) {
+                messageElement.textContent = data.message;
+                messageElement.className = 'success';
+                window.location.href = `#login`;
+            } else {
+                messageElement.textContent = data.message;
+                messageElement.className = 'error';
+            }
+        });
+
+        document.getElementById('locationForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+            const loc = document.getElementById('area').value;
+            const response = await fetch('/location', {
+                method: "POST",
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ area: loc })
+            });
+            const data = await response.json();
+            const messageEl = document.getElementById('locationmessage');
+            if (response.status === 200) {
+                messageEl.textContent = data.message;
+                messageEl.className = 'success';
+            } else {
+                messageEl.textContent = data.message;
+                messageEl.className = 'error';
+            }
+        });
     </script>
 </body>
 </html>
