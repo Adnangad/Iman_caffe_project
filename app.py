@@ -13,6 +13,7 @@ import datetime
 import base64
 
 app = Flask(__name__)
+app.secret_key = 'your_secret_key'
 cache_id = uuid4()
 
 @app.route("/", strict_slashes=False)
