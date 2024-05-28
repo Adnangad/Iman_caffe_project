@@ -15,11 +15,8 @@ class DBStorage:
     
     def __init__(self):
         """creates engine and instanciates"""
-        user = 'gard'
-        hst = 'localhost'
-        passwd = 'shop'
-        db = 'online_shop'
-        self.__engine = create_engine(f'mysql+mysqldb://{user}:{passwd}@{hst}/{db}')
+        database_url = os.getenv('JAWSDB_URL')
+        self.__engine = create_engine(database_url)
     
     def all(self, cls=None):
         """Lists all objects in db"""
