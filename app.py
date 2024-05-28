@@ -6,11 +6,6 @@ from models.stock import Stock
 from models.cart import Cart
 from uuid import uuid4
 import os
-from collections import defaultdict
-import requests
-from requests.auth import HTTPBasicAuth
-import datetime
-import base64
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
