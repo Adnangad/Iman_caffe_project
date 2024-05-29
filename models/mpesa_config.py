@@ -1,6 +1,6 @@
 import requests
 from requests.auth import HTTPBasicAuth
-from mpesa_exceptions import *
+from models.mpesa_exceptions import *
 from requests import Response
 import time
 import os
