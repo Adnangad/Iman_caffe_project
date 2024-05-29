@@ -242,7 +242,7 @@ def confirmation():
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
     phone_number = request.form.get('phone')
-    amount = request.form.get('amount')
+    int(amount) = request.form.get('amount')
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
 
