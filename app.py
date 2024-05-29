@@ -241,12 +241,11 @@ def confirmation():
 
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
-    phone_number = request.form.get('phone')
-    amount = int(request.form.get('amount'))
+    phone_number = '254792459746'
+    amount = 10
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
-
-    # Ensure amount is an integer
+    
     try:
         amount = int(amount)
     except ValueError:
