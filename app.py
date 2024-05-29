@@ -190,115 +190,102 @@ def log_out():
 consumer_key = 'S3a3NAoXyGasPf40g4dULSJur3wGsPvRiMzhu29zj5QAUCw6'
 consumer_secret = 'fPDIgXr6kVvhaZ2Ayu5EMeXXeJRvKLim3G8wqr2lwFA2jSCsDJGYw05VLkgxSmA2'
 base_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart'
-mpesa_environment = 'production'
-mpesa_paybill = '654321'
-sandbox_paybill = '123456'
-
-if mpesa_environment == 'sandbox':
-    business_short_code = sandbox_paybill
-else:
-    business_short_code = mpesa_paybill
-
-def api_base_url():
-    if mpesa_environment == 'sandbox':
-        return 'https://sandbox.safaricom.co.ke/'
-    elif mpesa_environment == 'production':
-        return 'https://api.safaricom.co.ke/'
-
-def format_phone_number(phone_number):
-    if len(phone_number) < 9:
-        return 'Phone number too short'
-    else:
-        return '254' + phone_number[-9:]
+short_code = '600986'
+confirmation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/confirmation'
+validation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/validation'
+response_type = 'Completed'
 
 def generate_access_token(consumer_key, consumer_secret):
-    url = api_base_url() + 'oauth/v1/generate?grant_type=client_credentials'
-    try:
-        r = requests.get(url, auth=HTTPBasicAuth(consumer_key, consumer_secret)).json()
-        token = r['access_token']
-    except Exception as ex:
-        print("Could not generate access code")
-        return str(ex)
-    return token
+    url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    response = requests.get(url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+    if response.status_code == 200:
+        return response.json().get('access_token')
+    else:
+        raise Exception("Failed to generate access token")
 
-@app.route('/mpesa_token')
-def access_token():
-    return generate_access_token(consumer_key, consumer_secret)
-
-@app.route('/register_mpesa_url')
-def register_url():
-    mpesa_endpoint = api_base_url() + 'mpesa/c2b/v1/registerurl'
-    headers = {
-        'Authorization': 'Bearer ' + generate_access_token(consumer_key, consumer_secret),
-        'Content-Type': 'application/json'
+def register_urls():
+    access_token = generate_access_token(consumer_key, consumer_secret)
+    url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl'
+    headers = {'Authorization': f'Bearer {access_token}'}
+    payload = {
+        "ShortCode": short_code,
+        "ResponseType": response_type,
+        "ConfirmationURL": confirmation_url,
+        "ValidationURL": validation_url
     }
-    req_body = {
-        'ShortCode': business_short_code,
-        'ResponseType': 'Completed',
-        'ConfirmationURL': base_url + '/confirm',
-        'ValidationURL': base_url + '/validate'
-    }
-    response_data = requests.post(mpesa_endpoint, json=req_body, headers=headers)
-    return response_data.json()
+    response = requests.post(url, json=payload, headers=headers)
+    print(response.json())
 
-@app.route('/validate', methods=['POST'])
-def validate():
-    jsonMpesaResponse = request.get_json()
-    print(jsonMpesaResponse)
-    return jsonify({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+register_urls()
 
-@app.route('/confirm', methods=['POST'])
-def confirm():
-    jsonMpesaResponse = request.get_json()
-    print(jsonMpesaResponse)
-    return jsonify({'ResultCode': 0, 'ResultDesc': 'Accepted'})
+def generate_access_token(consumer_key, consumer_secret):
+    url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    response = requests.get(url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+    if response.status_code == 200:
+        return response.json().get('access_token')
+    else:
+        raise Exception("Failed to generate access token")
+@app.route('/validation', methods=['POST'])
+def validation():
+    json_mpesa_response = request.get_json()
+    print(json_mpesa_response)  # Log the request for debugging
+    # Process the validation request
+    return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+@app.route('/confirmation', methods=['POST'])
+def confirmation():
+    json_mpesa_response = request.get_json()
+    print(json_mpesa_response)  # Log the request for debugging
+    # Process the confirmation request
+    return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
 
 @app.route('/payment', methods=['POST'])
-def mobilePayment():
-    phone_number = request.form['phone']
-    amount = int(request.form['amount'])  # Ensure amount is an integer
+def mobile_payment():
+    phone_number = request.form.get('phone')
+    amount = request.form.get('amount')
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
+
+    # Ensure amount is an integer
+    try:
+        amount = int(amount)
+    except ValueError:
+        return jsonify({"error": "Invalid amount"}), 400
+
     response = stk_push(phone_number, amount, account_reference, transaction_desc)
     return jsonify(response)
 
 def stk_push(phone_number, amount, account_reference, transaction_desc):
-    phone_number = format_phone_number(phone_number)
-    url = api_base_url() + 'mpesa/stkpush/v1/processrequest'
-    passkey = 'bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919'
-    timestamp = datetime.now().strftime('%Y%m%d%H%M%S')
-    password = base64.b64encode((business_short_code + passkey + timestamp).encode('ascii')).decode('utf-8')
-    transaction_type = 'CustomerPayBillOnline'
-    callback_url = base_url + '/confirm'
-
-    data = {
-        'BusinessShortCode': business_short_code,
-        'Password': password,
-        'Timestamp': timestamp,
-        'TransactionType': transaction_type,
-        'Amount': amount,
-        'PartyA': phone_number,
-        'PartyB': business_short_code,
-        'PhoneNumber': phone_number,
-        'CallBackURL': callback_url,
-        'AccountReference': account_reference,
-        'TransactionDesc': transaction_desc
+    access_token = generate_access_token(consumer_key, consumer_secret)
+    url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
+    headers = {'Authorization': f'Bearer {access_token}'}
+    payload = {
+        "BusinessShortCode": "174379",
+        "Password": generate_password(),
+        "Timestamp": generate_timestamp(),
+        "TransactionType": "CustomerPayBillOnline",
+        "Amount": amount,
+        "PartyA": phone_number,
+        "PartyB": "174379",
+        "PhoneNumber": phone_number,
+        "CallBackURL": "https://mydomain.com/callback",
+        "AccountReference": account_reference,
+        "TransactionDesc": transaction_desc
     }
+    response = requests.post(url, json=payload, headers=headers)
+    return response.json()
 
-    headers = {
-        'Authorization': 'Bearer ' + generate_access_token(consumer_key, consumer_secret),
-        'Content-Type': 'application/json'
-    }
+def generate_password():
+    import base64
+    from datetime import datetime
+    data_to_encode = "174379" + "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919" + generate_timestamp()
+    encoded_string = base64.b64encode(data_to_encode.encode())
+    return encoded_string.decode('utf-8')
 
-    try:
-        r = requests.post(url, json=data, headers=headers)
-        response = r.json()
-        return response
-    except requests.exceptions.ConnectionError:
-        return {'error': 'Connection failed'}
-    except Exception as ex:
-        return {'error': str(ex)}
-    
+def generate_timestamp():
+    from datetime import datetime
+    return datetime.now().strftime('%Y%m%d%H%M%S')
+
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
