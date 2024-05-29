@@ -28,10 +28,10 @@ def api_base_url():
     Returns:
         domain (url): the prefix domain for our APIs
     """
-	if mpesa_environment == 'sandbox':
-		return 'https://sandbox.safaricom.co.ke/'
-	elif mpesa_environment == 'production':
-		return 'https://api.safaricom.co.ke/'
+    if mpesa_environment == 'sandbox':
+        return 'https://sandbox.safaricom.co.ke/'
+    elif mpesa_environment == 'production':
+        return 'https://api.safaricom.co.ke/'
 
 
 def format_phone_number(phone_number):
@@ -43,10 +43,10 @@ def format_phone_number(phone_number):
     Returns:
         formated phone number (str): phone number starting with 254 formatted as text
     """
-	if len(phone_number) < 9:
-		return 'Phone number too short'
-	else:
-		return '254' + phone_number[-9:]
+    if len(phone_number) < 9:
+        return 'Phone number too short'
+    else:
+        return '254' + phone_number[-9:]
 
 
 def generate_access_token(consumer_key, consumer_secret):
@@ -77,19 +77,19 @@ def register_mpesa_url():
     Returns:
         json: confirmation for a successiful registration 
     """
-	mpesa_endpoint = api_base_url() + 'mpesa/c2b/v1/registerurl'            #endpoint we need to call to register our urls
-	headers = {
+    mpesa_endpoint = api_base_url() + 'mpesa/c2b/v1/registerurl'            #endpoint we need to call to register our urls
+    headers = {
 		'Authorization': 'Bearer ' + generate_access_token(consumer_key, consumer_secret),
 		'Content-Type': 'application/json'
 	}
-	req_body = {
+    req_body = {
 		'ShortCode': business_short_code,
 		'ResponseType': 'Completed',
 		'ConfirmationURL': base_url + '/confirm',
 		'ValidationURL': base_url + '/validate'}
 	
-	response_data = requests.post(mpesa_endpoint,json=req_body,headers=headers)
-	return response_data.json()
+    response_data = requests.post(mpesa_endpoint,json=req_body,headers=headers)
+    return response_data.json()
 
 
 #stk push for incoming payments. Credit to https://github.com/martinmogusu/django-daraja
