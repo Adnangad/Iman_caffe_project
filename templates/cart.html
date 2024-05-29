@@ -29,21 +29,6 @@
               body: JSON.stringify({}),
             });
             if (response.status === 200) {
-              const newButton = document.createElement("button");
-              newButton.id = "addButton";
-              newButton.className = "cart";
-              newButton.textContent = "Add to cart";
-              const item = product.querySelector("#item").textContent.trim();
-              const price = product.querySelector("#price").textContent.trim();
-              const image_path = product.querySelector("#image").src.trim();
-              const image_p = new URL(image_path).pathname;
-              const image = image_p.split("/static/")[1];
-              newButton.setAttribute(
-                "onclick",
-                `add_to_db('${item}', '${price}', '${image}')`
-              );
-              var parent = cartButton.parentNode;
-              parent.replaceChild(newButton, cartButton);
               location.reload();
             }
           });
@@ -81,13 +66,19 @@
             src="{{ url_for('static', filename=item_data.details.image) }}"
             alt="{{ item_name }}"
             id="image" />
+          <div class="item-content">
           <h2 class="item" id="item">{{ item_name }}</h2>
           <h6 class="price" id="price">Ksh{{ item_data.details.price }}</h6>
-          <p>Quantity: {{ item_data.count }}</p>
+          <button id="cartButton" class="cart">-</button>
+          <p class="num-item">Quantity: {{ item_data.count }}</p>
           <p id="cart_id" style="display: none">{{ item_data.details.id }}</p>
-          <button id="cartButton" class="cart">Remove from cart</button>
+          <button id="addButton" class="cart" onclick="add_to_db('{{ item_name }}', '{{ item_data.details.price }}', '{{ item_data.details.image }}')">+</button>
+          </div>
         </div>
         {% endfor %}
+        <div class="amount">
+          <h3>Subtotal: Ksh{{ total_price }}</h3>
+        </div>
       </div>
     </div>
     <div class="payment_menu">
@@ -114,9 +105,6 @@
           <button type="submit" class="payButton">Checkout</button>
         </form>
       </div>
-    </div>
-    <div class="amount">
-      <h3>Subtotal: Ksh{{ total_price }}</h3>
     </div>
   </body>
 </html>

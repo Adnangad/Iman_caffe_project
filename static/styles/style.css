@@ -1,17 +1,21 @@
 body {
   margin: 0;
   font-family: sans-serif;
-  background: #293040;
   padding: 0;
 }
+.rest_of_body {
+  background: url("../images/food_back.jpg");
+  background-repeat: no-repeat;
+  background-size: cover;
+}
 header {
-  background-color: #D5B263;
+  background: url("../images/header2.jpg");
   width: 100%;
   height: 120px;
   display: flex;
   align-items: center;
 }
-.logo {
+#logo {
   width: 150px;
   height: 125px;
   background: url("../icons/iman-caffe-high-resolution-logo\ \(1\).png");
@@ -29,32 +33,71 @@ header {
 .info ul li {
   float: left;
 }
-
-li a {
+li a,
+.category {
   display: block;
-  color: #333;
+  color: black;
   text-align: center;
   text-decoration: none;
   font-size: 25px;
   margin-left: 50px;
 }
 li a:hover {
-  color: black;
+  color: #d5b263;
 }
-.login {
-  width: 100px;
+.popup {
+  display: none;
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 100%;
+  height: 100%;
+  background-color: rgba(
+    0,
+    0,
+    0,
+    0.8
+  ); /* Add a background color with opacity */
+  border-radius: 10px;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+.popup-content {
+  background-color: #293040;
+  width: 50%;
+  height: 50%;
+  padding: 20px;
+  border-radius: 10px;
+  color: #d5b263;
   text-align: center;
 }
-.login a {
-  margin-top: auto;
-  margin-bottom: auto;
+.popup-content button {
+  margin-top: 10px;
+  padding: 10px 20px;
+  background-color: #d5b263;
+  color: #293040;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
 }
-.login_icon {
-  margin-left: auto;
-  margin-right: auto;
-  height: 20px;
-  width: 20px;
-  background: url("../icons/user-solid.svg") no-repeat center;
+.popup-content button:hover {
+  background-color: #e0bf7f;
+}
+#loginForm {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.input_bar {
+  width: 100%;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 5px;
+  border: none;
 }
 .content {
   display: flex;
@@ -62,9 +105,9 @@ li a:hover {
   width: 100%;
   justify-content: center;
   align-items: center;
-  margin: 10px 50px 0 0;
 }
 .product {
+  background: #3e4961;
   width: 20%;
   margin: 15px;
   box-sizing: border-box;
@@ -75,14 +118,12 @@ li a:hover {
   cursor: pointer;
   box-shadow: 0 14px 28px rgba(0, 0, 0, 0.25), 0 10px 10px rgba(0, 0, 0, 0.22);
   transition: 0.5s;
-  background: #3e4961;
 }
 .product:hover {
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16), 0 3px 6px rgba(0, 0, 0, 0.23);
-  transform: translate(0px, -8px);
+  transform: translateY(-5px);
 }
-
-img {
+.product img {
   width: 100%;
   margin: 0 auto;
   text-align: center;
@@ -90,34 +131,84 @@ img {
   display: block;
   border-radius: 20px;
 }
-
-h2 {
+.product h2 {
   text-align: center;
   padding-top: 0 8px;
   color: white;
 }
-
-p {
+.product p {
   margin-top: 2px;
   color: white;
 }
-
-h6 {
+.product h6 {
   font-size: 23px;
   text-align: center;
   color: navajowhite;
   margin: 0;
 }
-#price {
-  text-align: left;
-}
-button {
+.cartButton {
+  background-color: #d5b263;
+  border: none;
   border-radius: 12px;
   color: #333;
-  background-color: #D5B263;
-  width: 95px;
-  height: 30px;
   cursor: pointer;
-  border: none;
   margin-bottom: 8px;
+  padding: 10px 20px;
+}
+.cartButton:hover {
+  background-color: #e0bf7f;
+}
+.dropdown-content {
+  display: none;
+  background-color: #3e4961;
+  box-shadow: 0px 8px 16px 0px rgba(0, 0, 0, 0.2);
+  min-width: 160px;
+  position: absolute;
+  z-index: 1;
+}
+.dropdown-content a {
+  color: #d5b263;
+  display: block;
+  padding: 12px 16px;
+  text-decoration: none;
+}
+.dropdown-content a:hover {
+  color: black;
+}
+.dropdown:hover .dropdown-content {
+  display: block;
+}
+.category {
+  background-color: inherit;
+  border: none;
+  font-family: inherit;
+  outline: none;
+}
+.pagination {
+  display: flex;
+  justify-content: center;
+  float: right;
+  margin-top: 20px;
+}
+.pagination a {
+  color: #333;
+  float: left;
+  padding: 8px 16px;
+  text-decoration: none;
+  transition: background-color 0.3s;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin: 0 4px;
+}
+.pagination a.active {
+  background-color: #d5b263;
+  color: white;
+  border: 1px solid #293040;
+}
+.pagination a:hover:not(.active) {
+  background-color: #ddd;
+}
+.pagination a.previous,
+.pagination a.next {
+  font-weight: bold;
 }

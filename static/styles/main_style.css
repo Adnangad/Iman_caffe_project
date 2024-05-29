@@ -1,5 +1,5 @@
 header {
-  background-color: #D5B263;
+  background: url("../images/header_back.jpg");
   width: 100%;
   height: 120px;
   display: flex;
@@ -30,7 +30,7 @@ body {
 
 li a {
   display: block;
-  color: #293040;
+  color: black;
   text-align: center;
   text-decoration: none;
   font-size: 25px;
@@ -38,43 +38,46 @@ li a {
 }
 .popup {
   position: fixed;
-  z-index: 1;
-  left: -25%;
-  top: 0;
-  width: 150%;
+  left: 400px;
+  top: 100px;
+  width: 100%;
   height: 100%;
   overflow: hidden;
-  display: none;
-  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: blur(5px);
   backdrop-filter: blur(2px);
 }
+
 .popup-content {
   background-color: #293040;
-  margin: 10% auto;
-  padding: 15px;
+  padding: 10px;
   border: 1.5px solid black;
   width: 35%;
   font-weight: bolder;
   border-radius: 10px;
-  height: 60%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   font-size: 25px;
-  color: #D5B263;
+  color: #d5b263;
 }
+
 .popup-content button {
   display: block;
-  margin: 0 auto;
+  margin: 10px auto;
 }
-#ClosePopup, #ClosesignPopup{
-  float: right;
-  margin-top: 0px;
-  margin-right: 0px;
-  color: #293040;
-  background-color: #D5B263;
-  border-radius: 2px;
+
+#loginForm,
+#signupForm {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
 }
-#ClosePopup:hover, #ClosesignPopup:hover{
-  transform: translate(0px, -8px);
-}
+
 .input_bar {
   width: 350px;
   height: 30px;
@@ -83,14 +86,29 @@ li a {
   margin-top: 15px;
   font-size: 15px;
 }
+
+#ClosePopup,
+#ClosesignPopup {
+  align-self: flex-end;
+  color: #293040;
+  background-color: #d5b263;
+  border-radius: 2px;
+  margin-bottom: 15px;
+}
+
+#ClosePopup:hover,
+#ClosesignPopup:hover {
+  transform: translate(0px, -8px);
+}
+
 .show {
-  display: block;
+  display: flex;
 }
 
 .large_img {
-  background: url("../images/buffetss.jpg");
-  background-size: cover; /* Ensure the background image covers the entire element */
-  background-position: center; /* Center the background image */
+  background: url("../images/food_back.jpg");
+  background-size: cover;
+  background-position: center;
   margin-top: -45px;
   height: 600px;
   text-align: center;
@@ -100,7 +118,7 @@ li a {
   height: 600px;
   background: rgba(0, 0, 0, 0.5);
 }
-.large_img .slogan {
+.large_img .slogan{
   color: #fff;
   font-size: 45px;
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
@@ -126,7 +144,7 @@ li a {
 .search {
   border: none;
   color: #293040;
-  background-color: #D5B263;
+  background-color: #d5b263;
   width: 80px;
   height: 35px;
   font-size: 17px;
@@ -135,8 +153,8 @@ li a {
 }
 
 footer {
-  background-color: #293040;
-  color: #ffffff;
+  background: url("../images/header_back.jpg");
+  color: black;
   padding: 20px 0;
 }
 
@@ -159,7 +177,7 @@ footer {
 }
 
 .footer-col a {
-  color: #D5B263;
+  color: #d5b263;
   text-decoration: none;
   display: block;
   margin: 5px 0;

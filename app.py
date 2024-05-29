@@ -5,7 +5,10 @@ from models.area import Area
 from models.stock import Stock
 from models.cart import Cart
 from uuid import uuid4
+from models.mpesa_config import generate_access_token, register_mpesa_url, stk_push
 import os
+from collections import defaultdict
+from math import ceil
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -97,14 +100,43 @@ def remove_from_cart(cart_id):
             number_of_items = number_of_items + 1
     number_of_items = str(number_of_items)
     return jsonify({'message': 'Item added to cart successfully', 'number_of_items': number_of_items}), 200
-@app.route("/menu")
+@app.route("/menu", methods=['GET'], strict_slashes=False)
 def get_menu():
+    page = request.args.get('page', 1, type=int)
+    limit = request.args.get('limit', 10, type=int)
     stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
+    total_stocks = len(stocks)
+    total_pages = (total_stocks + limit - 1) // limit  # Calculate total pages
+    start = (page - 1) * limit
+    end = start + limit
+    paginated_stocks = stocks[start:end]
+
     if 'user_id' not in session:
-        return redirect(url_for('index'))
+        return render_template('menu.html', stocks=paginated_stocks, page=page, total_pages=total_pages, cache_id=cache_id)
+    
     user_id = session['user_id']
     user = storage.get(User, user_id)
-    return render_template('menu.html', stocks=stocks, cache_id=cache_id, user=user)
+    return render_template('menu.html', stocks=paginated_stocks, page=page, total_pages=total_pages, cache_id=cache_id, user=user)
+
+@app.route("/menu/<category>", methods=['GET'], strict_slashes=False)
+def get_menu_cat(category):
+    stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
+    if 'user_id' not in session:
+         if category.lower() == 'all_items':
+             return render_template('menu.html', stocks=stocks, cache_id=cache_id)
+         else:
+             filtered_stocks = [stock for stock in stocks if stock.category.lower() == category.lower()]
+             return render_template('menu.html', stocks=filtered_stocks, cache_id=cache_id)
+         
+    user_id = session['user_id']
+    user = storage.get(User, user_id)
+    stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
+
+    if category.lower() == 'all_items':
+        return render_template('menu.html', stocks=stocks, cache_id=cache_id, user=user)
+    else:
+        filtered_stocks = [stock for stock in stocks if stock.category.lower() == category.lower()]
+        return render_template('menu.html', stocks=filtered_stocks, cache_id=cache_id, user=user)
 @app.route('/checkitem/<stock_id>')
 def check_item(stock_id):
     stock = storage.get(Stock, stock_id)
@@ -143,14 +175,48 @@ def user_info():
         return jsonify({'message': 'User does not exist'}), 400
     user_id = session['user_id']
     user = storage.get(User, user_id)
-    return render_template('user.html', user=user)
+    stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
+    return render_template('user.html', user=user, stocks=stocks)
 
 @app.route('/logout', methods=['GET'])
 def log_out():
-    if 'user_id' not in session:
-        return jsonify({'message': 'User does not exist'}), 400
     del(session['user_id'])
     return render_template('index.html', cache_id=cache_id)
+
+@app.route('/mpesa_token')
+def access_token():
+    consumer_key = 'S3a3NAoXyGasPf40g4dULSJur3wGsPvRiMzhu29zj5QAUCw6'
+    consumer_secret = 'fPDIgXr6kVvhaZ2Ayu5EMeXXeJRvKLim3G8wqr2lwFA2jSCsDJGYw05VLkgxSmA2'
+    return generate_access_token(consumer_key, consumer_secret)
+
+
+@app.route('/register_mpesa_url')
+def register_url():
+    return register_mpesa_url()
+
+
+@app.route('/validate', methods=['POST'])
+def validate():
+    if request.method == 'POST':
+        jsonMpesaResponse = request.get_json()  
+        print(jsonMpesaResponse)
+        return render_template ("home.html")
+
+@app.route('/confirm', methods=['POST'])
+def confirm():
+    if request.method == 'POST':
+        jsonMpesaResponse = request.get_json()
+    return render_template ("index.html")
+
+
+#Our application URL for collecting request data and firing the payment process
+@app.route('/payment')
+def mobilePayment():
+    phone_number = request.args.get['phone']
+    amount = request.args.get['amount']                   #ensure amount is an integer and not a floating point number
+    account_reference = 'TEST123'       #This is the reference that will appear as the account number on the paybill payment
+    transaction_desc = 'Payment for supplies'   #Any description
+    return stk_push(phone_number, amount, account_reference, transaction_desc)
     
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
