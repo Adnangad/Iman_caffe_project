@@ -254,7 +254,7 @@ def stk_push(phone_number, amount, account_reference, transaction_desc):
         "PartyA": phone_number,
         "PartyB": "174379",
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://yourdomain.com/callback",
+        "CallBackURL": "https://imaan-caffe-f7f987595df4.herokuapp.com/callback",
         "AccountReference": account_reference,
         "TransactionDesc": transaction_desc
     }
