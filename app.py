@@ -228,7 +228,7 @@ def is_valid_phone_number(phone_number):
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
     phone_number = request.form.get('phone')
-    amount = 20
+    amount = request.form.get('amount')
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
     if not is_valid_phone_number(phone_number):
@@ -254,13 +254,12 @@ def stk_push(phone_number, amount, account_reference, transaction_desc):
         "PartyA": phone_number,
         "PartyB": "174379",
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://imaan-caffe-f7f987595df4.herokuapp.com/callback",
+        "CallBackURL": "https://yourdomain.com/callback",
         "AccountReference": account_reference,
         "TransactionDesc": transaction_desc
     }
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
-
 
 @app.route('/callback', methods=['POST'])
 def mpesa_callback():
@@ -288,12 +287,9 @@ def payment_status():
         return render_template('failure.html', message="Payment failed. Please try again.")
 
 def generate_password():
-    from datetime import datetime
     import base64
-    business_short_code = "174379"
-    lipa_na_mpesa_online_passkey = "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919"
-    timestamp = generate_timestamp()
-    data_to_encode = business_short_code + lipa_na_mpesa_online_passkey + timestamp
+    from datetime import datetime
+    data_to_encode = "174379" + "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919" + generate_timestamp()
     encoded_string = base64.b64encode(data_to_encode.encode())
     return encoded_string.decode('utf-8')
 
