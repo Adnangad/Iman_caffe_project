@@ -192,7 +192,7 @@ def log_out():
 consumer_key = 'S3a3NAoXyGasPf40g4dULSJur3wGsPvRiMzhu29zj5QAUCw6'
 consumer_secret = 'fPDIgXr6kVvhaZ2Ayu5EMeXXeJRvKLim3G8wqr2lwFA2jSCsDJGYw05VLkgxSmA2'
 base_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart'
-short_code = '600988'
+short_code = '600978'
 confirmation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/confirmation'
 validation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/validation'
 response_type = 'Completed'
@@ -221,7 +221,6 @@ def register_urls():
 register_urls()
 
 def is_valid_phone_number(phone_number):
-    # Check if the phone number matches the pattern for Kenyan numbers in international format
     pattern = re.compile(r'^2547\d{8}$')
     return pattern.match(phone_number)
 
