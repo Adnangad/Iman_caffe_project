@@ -248,8 +248,9 @@ def mobile_payment():
     try:
         phone_number = str(phone_number)
     except ValueError:
-        return
-    try:jsonify({'error': 'Invalid num'}), 400
+        return jsonify({'error': 'Invalid num'}), 400
+    
+    try:
         amount = int(amount)
     except ValueError:
         return jsonify({"error": "Invalid amount"}), 400
