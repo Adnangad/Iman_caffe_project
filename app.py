@@ -227,7 +227,7 @@ def is_valid_phone_number(phone_number):
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
     phone_number = request.form.get('phone')
-    amount = 30
+    amount = 1000
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
     if not is_valid_phone_number(phone_number):
