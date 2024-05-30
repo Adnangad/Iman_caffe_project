@@ -13,6 +13,7 @@ import base64
 from datetime import datetime
 from collections import defaultdict
 from math import ceil
+import re
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -239,13 +240,19 @@ def confirmation():
     # Process the confirmation request
     return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
 
+def is_valid_phone_number(phone_number):
+    # Check if the phone number matches the pattern for Kenyan numbers in international format
+    pattern = re.compile(r'^2547\d{8}$')
+    return pattern.match(phone_number)
+
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
-    phone_number = '254792459746'
-    amount = 10
+    phone_number = request.form.get('phone')
+    amount = request.form.get('amount')
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
-    
+    if not is_valid_phone_number(phone_number):
+        return jsonify({"error": "Invalid phone number format"}), 400    
     try:
         amount = int(amount)
     except ValueError:
