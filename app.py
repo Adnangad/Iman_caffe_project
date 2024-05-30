@@ -190,7 +190,7 @@ def log_out():
 consumer_key = 'S3a3NAoXyGasPf40g4dULSJur3wGsPvRiMzhu29zj5QAUCw6'
 consumer_secret = 'fPDIgXr6kVvhaZ2Ayu5EMeXXeJRvKLim3G8wqr2lwFA2jSCsDJGYw05VLkgxSmA2'
 base_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart'
-short_code = '600988'
+short_code = '600989'
 confirmation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/confirmation'
 validation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/validation'
 response_type = 'Completed'
@@ -241,7 +241,7 @@ def confirmation():
 
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
-    phone_number = request.form.get['phone']
+    phone_number = str(request.form.get['phone'])
     amount = int(request.form.get['amount'])
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
