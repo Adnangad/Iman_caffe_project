@@ -225,6 +225,21 @@ def is_valid_phone_number(phone_number):
     pattern = re.compile(r'^2547\d{8}$')
     return pattern.match(phone_number)
 
+@app.route('/payment', methods=['POST'])
+def mobile_payment():
+    phone_number = request.form.get('phone')
+    amount = 20
+    account_reference = 'TEST123'
+    transaction_desc = 'Payment for supplies'
+    if not is_valid_phone_number(phone_number):
+        return jsonify({"error": "Invalid phone number format"}), 400    
+    try:
+        amount = int(amount)
+    except ValueError:
+        return jsonify({"error": "Invalid amount"}), 400
+
+    response = stk_push(phone_number, amount, account_reference, transaction_desc)
+    return jsonify(response)
 
 def stk_push(phone_number, amount, account_reference, transaction_desc):
     access_token = generate_access_token(consumer_key, consumer_secret)
@@ -246,6 +261,32 @@ def stk_push(phone_number, amount, account_reference, transaction_desc):
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
 
+
+@app.route('/callback', methods=['POST'])
+def mpesa_callback():
+    data = request.get_json()
+    result_code = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
+    
+    if result_code == 0:
+        # Payment was successful
+        print("Payment successful:", data)
+        payment_status = "success"
+    else:
+        # Payment failed
+        print("Payment failed:", data)
+        payment_status = "failure"
+    
+    # Redirect the user based on payment status
+    return redirect(url_for('payment_status', status=payment_status))
+
+@app.route('/payment_status')
+def payment_status():
+    status = request.args.get('status')
+    if status == "success":
+        return render_template('success.html', message="Payment was successful. Thank you!")
+    else:
+        return render_template('failure.html', message="Payment failed. Please try again.")
+
 def generate_password():
     from datetime import datetime
     import base64
@@ -260,60 +301,6 @@ def generate_timestamp():
     from datetime import datetime
     return datetime.now().strftime('%Y%m%d%H%M%S')
 
-@app.route('/payment', methods=['POST'])
-def mobile_payment():
-    phone_number = request.form.get('phone')
-    carts = sorted(list(storage.all(Cart).values()), key=lambda x: x.item)
-    amount = 0
-    user_id = session['user_id']
-    user = storage.get(User, user_id)
-    for cart in carts:
-        if cart.user_id == user.id:
-            amount = cart.price + amount
-    account_reference = 'TEST123'
-    transaction_desc = 'Payment for supplies'
-    
-    if not is_valid_phone_number(phone_number):
-        return jsonify({"error": "Invalid phone number format"}), 400
-    
-    try:
-        amount = int(amount)
-    except ValueError:
-        return jsonify({"error": "Invalid amount"}), 400
-
-    response = stk_push(phone_number, amount, account_reference, transaction_desc)
-    
-    if response.get("ResponseCode") == "0":
-        return render_template('waiting.html', checkout_request_id=response["CheckoutRequestID"])
-    else:
-        return render_template('failure.html', message="Failed to initiate payment. Please try again.")
-
-@app.route('/callback', methods=['POST'])
-def mpesa_callback():
-    data = request.get_json()
-    result_code = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
-    
-    if result_code == 0:
-        # Payment was successful
-        payment_status = "success"
-    else:
-        # Payment failed
-        payment_status = "failure"
-    
-    # Store the payment status in session or database as needed
-    session['payment_status'] = payment_status
-
-    return jsonify({"message": "Callback received successfully"})
-
-@app.route('/payment_status')
-def payment_status():
-    status = session.get('payment_status', 'failure')
-    if status == "success":
-        return render_template('success.html', message="Payment was successful. Thank you!")
-    else:
-        return render_template('failure.html', message="Payment failed. Please try again.")
-    
-    
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port)
