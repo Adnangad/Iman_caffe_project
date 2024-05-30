@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, redirect, render_template, url_for, session
+from flask import *
 from models.user import User
 from models import storage
 from models.area import Area
@@ -105,7 +105,6 @@ def remove_from_cart(cart_id):
             number_of_items = number_of_items + 1
     number_of_items = str(number_of_items)
     return jsonify({'message': 'Item added to cart successfully', 'number_of_items': number_of_items}), 200
-
 @app.route("/menu", methods=['GET'], strict_slashes=False)
 def get_menu():
     page = request.args.get('page', 1, type=int)
@@ -143,7 +142,6 @@ def get_menu_cat(category):
     else:
         filtered_stocks = [stock for stock in stocks if stock.category.lower() == category.lower()]
         return render_template('menu.html', stocks=filtered_stocks, cache_id=cache_id, user=user)
-
 @app.route('/checkitem/<stock_id>')
 def check_item(stock_id):
     stock = storage.get(Stock, stock_id)
@@ -153,6 +151,7 @@ def check_item(stock_id):
     user_id = session['user_id']
     user = storage.get(User, user_id)
     return render_template('item.html', stock=stock, user=user, stocks=stocks)
+
 
 @app.route("/cart", methods=["GET"])
 def show_cart():
@@ -220,6 +219,27 @@ def register_urls():
 
 register_urls()
 
+def generate_access_token(consumer_key, consumer_secret):
+    url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
+    response = requests.get(url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
+    if response.status_code == 200:
+        return response.json().get('access_token')
+    else:
+        raise Exception("Failed to generate access token")
+@app.route('/validation', methods=['POST'])
+def validation():
+    json_mpesa_response = request.get_json()
+    print(json_mpesa_response)  # Log the request for debugging
+    # Process the validation request
+    return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
+
+@app.route('/confirmation', methods=['POST'])
+def confirmation():
+    json_mpesa_response = request.get_json()
+    print(json_mpesa_response)  # Log the request for debugging
+    # Process the confirmation request
+    return jsonify({"ResultCode": 0, "ResultDesc": "Accepted"})
+
 def is_valid_phone_number(phone_number):
     # Check if the phone number matches the pattern for Kenyan numbers in international format
     pattern = re.compile(r'^2547\d{8}$')
@@ -254,7 +274,7 @@ def stk_push(phone_number, amount, account_reference, transaction_desc):
         "PartyA": phone_number,
         "PartyB": "174379",
         "PhoneNumber": phone_number,
-        "CallBackURL": "https://yourdomain.com/callback",
+        "CallBackURL": "https://mydomain.com/callback",
         "AccountReference": account_reference,
         "TransactionDesc": transaction_desc
     }
@@ -262,29 +282,13 @@ def stk_push(phone_number, amount, account_reference, transaction_desc):
     return response.json()
 
 @app.route('/callback', methods=['POST'])
-def mpesa_callback():
-    data = request.get_json()
+def call_back():
+    data = request.json()
     result_code = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
-    
     if result_code == 0:
-        # Payment was successful
-        print("Payment successful:", data)
-        payment_status = "success"
+        return render_template('success.html')
     else:
-        # Payment failed
-        print("Payment failed:", data)
-        payment_status = "failure"
-    
-    # Redirect the user based on payment status
-    return redirect(url_for('payment_status', status=payment_status))
-
-@app.route('/payment_status')
-def payment_status():
-    status = request.args.get('status')
-    if status == "success":
-        return render_template('success.html', message="Payment was successful. Thank you!")
-    else:
-        return render_template('failure.html', message="Payment failed. Please try again.")
+        return render_template('failure.html')
 
 def generate_password():
     import base64
