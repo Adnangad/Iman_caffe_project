@@ -228,7 +228,13 @@ def is_valid_phone_number(phone_number):
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
     phone_number = request.form.get('phone')
-    amount = request.form.get('amount')
+    user_id = session['user_id']
+    user = storage.get(User, user_id)
+    carts = sorted(list(storage.all(Cart).values()), key=lambda x: x.item)
+    amount = 0
+    for cart in carts:
+        if cart.user_id == user.id:
+            amount = amount + cart.price
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
     if not is_valid_phone_number(phone_number):
