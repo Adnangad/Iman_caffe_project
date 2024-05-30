@@ -274,6 +274,15 @@ def stk_push(phone_number, amount, account_reference, transaction_desc):
     response = requests.post(url, json=payload, headers=headers)
     return response.json()
 
+@app.route('/callback', methods=['POST'])
+def call_back():
+    data = request.json()
+    result_code = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
+    if result_code == 0:
+        return render_template('success.html')
+    else:
+        return render_template('failure.html')
+
 def generate_password():
     import base64
     from datetime import datetime
