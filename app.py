@@ -245,8 +245,11 @@ def mobile_payment():
     amount = int(request.form.get['amount'])
     account_reference = 'TEST123'
     transaction_desc = 'Payment for supplies'
-    
     try:
+        phone_number = str(phone_number)
+    except ValueError:
+        return
+    try:jsonify({'error': 'Invalid num'}), 400
         amount = int(amount)
     except ValueError:
         return jsonify({"error": "Invalid amount"}), 400
