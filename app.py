@@ -185,7 +185,7 @@ def log_out():
     del(session['user_id'])
     return render_template('index.html', cache_id=cache_id)
 
-MAILGUN_API_KEY = 'your_mailgun_api_key'
+MAILGUN_API_KEY = '0996409b-d94e8ed5'
 MAILGUN_DOMAIN = 'sandboxabdacdfdde0b4a70bc967ee39499e79b.mailgun.org'
 CREATOR_EMAIL = 'adnanobuya@gmail.com'
 FROM_EMAIL = 'adnanobuya@gmail.com'
