@@ -5,12 +5,8 @@ from models.area import Area
 from models.stock import Stock
 from models.cart import Cart
 from uuid import uuid4
-from models.mpesa_config import generate_access_token, register_mpesa_url, stk_push
 import os
-from requests.auth import HTTPBasicAuth
 import requests
-import base64
-from datetime import datetime
 from collections import defaultdict
 from math import ceil
 import re
@@ -189,112 +185,45 @@ def log_out():
     del(session['user_id'])
     return render_template('index.html', cache_id=cache_id)
 
-consumer_key = 'S3a3NAoXyGasPf40g4dULSJur3wGsPvRiMzhu29zj5QAUCw6'
-consumer_secret = 'fPDIgXr6kVvhaZ2Ayu5EMeXXeJRvKLim3G8wqr2lwFA2jSCsDJGYw05VLkgxSmA2'
-base_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart'
-short_code = '600978'
-confirmation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/confirmation'
-validation_url = 'https://imaan-caffe-f7f987595df4.herokuapp.com/cart/validation'
-response_type = 'Completed'
+MAILGUN_API_KEY = 'your_mailgun_api_key'
+MAILGUN_DOMAIN = 'sandboxabdacdfdde0b4a70bc967ee39499e79b.mailgun.org'
+CREATOR_EMAIL = 'adnanobuya@gmail.com'
+FROM_EMAIL = 'adnanobuya@gmail.com'
 
-def generate_access_token(consumer_key, consumer_secret):
-    url = 'https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials'
-    response = requests.get(url, auth=HTTPBasicAuth(consumer_key, consumer_secret))
-    if response.status_code == 200:
-        return response.json().get('access_token')
-    else:
-        raise Exception("Failed to generate access token")
-
-def register_urls():
-    access_token = generate_access_token(consumer_key, consumer_secret)
-    url = 'https://sandbox.safaricom.co.ke/mpesa/c2b/v1/registerurl'
-    headers = {'Authorization': f'Bearer {access_token}'}
-    payload = {
-        "ShortCode": short_code,
-        "ResponseType": response_type,
-        "ConfirmationURL": confirmation_url,
-        "ValidationURL": validation_url
+def send_email(user_email, creator_email, order_details):
+    url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
+    auth = ("api", MAILGUN_API_KEY)
+    data = {
+        "from": f"Excited User <{FROM_EMAIL}>",
+        "to": [user_email, creator_email],
+        "subject": "Order Details",
+        "text": f"{order_details}"
     }
-    response = requests.post(url, json=payload, headers=headers)
-    print(response.json())
-
-register_urls()
-
-def is_valid_phone_number(phone_number):
-    pattern = re.compile(r'^2547\d{8}$')
-    return pattern.match(phone_number)
+    response = requests.post(url, auth=auth, data=data)
+    return response.status_code
 
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
-    phone_number = request.form.get('phone')
-    amount = 20
-    account_reference = 'TEST123'
-    transaction_desc = 'Payment for supplies'
-    if not is_valid_phone_number(phone_number):
-        return jsonify({"error": "Invalid phone number format"}), 400    
-    try:
-        amount = int(amount)
-    except ValueError:
-        return jsonify({"error": "Invalid amount"}), 400
+    if 'user_id' not in session:
+        return jsonify({'message': 'Please login.'}), 401
 
-    response = stk_push(phone_number, amount, account_reference, transaction_desc)
-    return jsonify(response)
+    user_id = session['user_id']
+    user = storage.get(User, user_id)
+    if not user:
+        return jsonify({'message': 'User not found.'}), 404
 
-def stk_push(phone_number, amount, account_reference, transaction_desc):
-    access_token = generate_access_token(consumer_key, consumer_secret)
-    url = 'https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest'
-    headers = {'Authorization': f'Bearer {access_token}'}
-    payload = {
-        "BusinessShortCode": "174379",
-        "Password": generate_password(),
-        "Timestamp": generate_timestamp(),
-        "TransactionType": "CustomerPayBillOnline",
-        "Amount": amount,
-        "PartyA": phone_number,
-        "PartyB": "174379",
-        "PhoneNumber": phone_number,
-        "CallBackURL": "https://yourdomain.com/callback",
-        "AccountReference": account_reference,
-        "TransactionDesc": transaction_desc
-    }
-    response = requests.post(url, json=payload, headers=headers)
-    return response.json()
+    carts = sorted(list(storage.all(Cart).values()), key=lambda x: x.item)
+    order_details = {}
+    for cart in carts:
+        if cart.user_id == user.id:
+            order_details[cart.item] = cart.price
 
-@app.route('/callback', methods=['POST'])
-def mpesa_callback():
-    data = request.get_json()
-    result_code = data.get('Body', {}).get('stkCallback', {}).get('ResultCode')
-    
-    if result_code == 0:
-        # Payment was successful
-        print("Payment successful:", data)
-        payment_status = "success"
+    order_details_str = "\n".join([f"{item}: ${price}" for item, price in order_details.items()])
+    stat = send_email(user.email, CREATOR_EMAIL, order_details_str)
+    if stat == 200:
+        return jsonify({'message': 'Order processed and email sent successfully'}), 200
     else:
-        # Payment failed
-        print("Payment failed:", data)
-        payment_status = "failure"
-    
-    # Redirect the user based on payment status
-    return redirect(url_for('payment_status', status=payment_status))
-
-@app.route('/payment_status')
-def payment_status():
-    status = request.args.get('status')
-    if status == "success":
-        return render_template('success.html', message="Payment was successful. Thank you!")
-    else:
-        return render_template('failure.html', message="Payment failed. Please try again.")
-
-def generate_password():
-    import base64
-    from datetime import datetime
-    data_to_encode = "174379" + "bfb279f9aa9bdbcf158e97dd71a467cd2e0c893059b10f78e6b72ada1ed2c919" + generate_timestamp()
-    encoded_string = base64.b64encode(data_to_encode.encode())
-    return encoded_string.decode('utf-8')
-
-def generate_timestamp():
-    from datetime import datetime
-    return datetime.now().strftime('%Y%m%d%H%M%S')
+        return "error issues"
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
