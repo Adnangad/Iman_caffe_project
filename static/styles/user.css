@@ -205,3 +205,15 @@ h6 {
   border: none;
   margin-bottom: 8px;
 }
+.input_bar {
+  padding-top: 0px;
+  width: 75%;
+  margin-top: 7px;
+}
+.sub_but {
+  margin-top: 10px;
+  margin-left: 30px;
+  color: #d5b263;
+  background-color: #293040;
+  cursor: pointer;
+}

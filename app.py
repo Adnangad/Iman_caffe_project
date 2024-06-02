@@ -9,7 +9,9 @@ import os
 import requests
 from collections import defaultdict
 from math import ceil
-import re
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
 
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
@@ -30,6 +32,10 @@ def check_Area():
         if loc == a.name:
             return jsonify({'message': 'We do deliver in that location'}), 200
     return jsonify({'message': 'Sorry but we are not yet available in that location'}), 400
+
+@app.route('/moreinfo', methods=["GET"])
+def get_inf():
+    return render_template("inf.html")
 
 @app.route("/login", methods=["POST"])
 def sign_in():
@@ -185,22 +191,52 @@ def log_out():
     del(session['user_id'])
     return render_template('index.html', cache_id=cache_id)
 
-MAILGUN_API_KEY = '0996409b-d94e8ed5'
-MAILGUN_DOMAIN = 'sandboxabdacdfdde0b4a70bc967ee39499e79b.mailgun.org'
-CREATOR_EMAIL = 'adnanobuya@gmail.com'
+@app.route('/delete_user', methods=['DELETE'])
+def delete_user():
+    user_id = session['user_id']
+    user = storage.get(User, user_id)
+    storage.delete(user)
+    del(session['user_id'])
+    return jsonify({"message":"Your account has been deleted permanently"}), 200
+
+@app.route('/update_user', methods=['PUT'])
+def update_user():
+    user_id = session['user_id']
+    user = storage.get(User, user_id)
+    if not user:
+        return jsonify({"message": "User doesn't exist"}), 400
+    data = request.get_json()
+    for key, value in data.items():
+        if key not in ['id', 'email']:
+            setattr(user, key, value)
+    user.save()
+    return jsonify({"message": "You have successfully updated your details"})
+
+SMTP_SERVER = 'smtp.mailgun.org'
+SMTP_PORT = 587
+SMTP_USERNAME = 'postmaster@sandboxabdacdfdde0b4a70bc967ee39499e79b.mailgun.org'
+SMTP_PASSWORD = '4a6ea5456167ad6b26401b37432c6199-0996409b-c1af1b6d'
 FROM_EMAIL = 'adnanobuya@gmail.com'
+CREATOR_EMAIL = 'adnanobuya@gmail.com'
 
 def send_email(user_email, creator_email, order_details):
-    url = f"https://api.mailgun.net/v3/{MAILGUN_DOMAIN}/messages"
-    auth = ("api", MAILGUN_API_KEY)
-    data = {
-        "from": f"Excited User <{FROM_EMAIL}>",
-        "to": [user_email, creator_email],
-        "subject": "Order Details",
-        "text": f"{order_details}"
-    }
-    response = requests.post(url, auth=auth, data=data)
-    return response.status_code
+    message = MIMEMultipart()
+    message['From'] = FROM_EMAIL
+    message['To'] = ', '.join([user_email, creator_email])
+    message['Subject'] = 'Order Details'
+    
+    # Create the plain text part of the message
+    text = f'Order Details:\n{order_details}'
+    message.attach(MIMEText(text, 'plain'))
+    
+    try:
+        with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(SMTP_USERNAME, SMTP_PASSWORD)
+            server.sendmail(FROM_EMAIL, [user_email, creator_email], message.as_string())
+        print("Email sent successfully")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
@@ -218,13 +254,11 @@ def mobile_payment():
         if cart.user_id == user.id:
             order_details[cart.item] = cart.price
 
-    order_details_str = "\n".join([f"{item}: ${price}" for item, price in order_details.items()])
-    stat = send_email(user.email, CREATOR_EMAIL, order_details_str)
-    if stat == 200:
-        return jsonify({'message': 'Order processed and email sent successfully'}), 200
-    else:
-        return "error issues"
+    order_details_str = f"name:{user.name}\nuser_id:{user.id}\n".join([f"{item}: ksh{price}" for item, price in order_details.items()])
+    send_email(user.email, CREATOR_EMAIL, order_details_str)
+    
+    return render_template('success.html', user=user)
 
 if __name__ == '__main__':
     port = int(os.environ.get('PORT', 5000))
-    app.run(host='0.0.0.0', port=port)
+    app.run(host='0.0.0.0', port=port, debug=True)
