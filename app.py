@@ -254,7 +254,7 @@ def mobile_payment():
         if cart.user_id == user.id:
             order_details[cart.item] = cart.price
 
-    order_details_str = f"name:{user.name}\nuser_id:{user.id}\n".join([f"{item}: ksh{price}" for item, price in order_details.items()])
+    order_details_str = f"name:{user.name}\nuser_id:{user.id}\n" + "\n".join([f"{item}: ksh{price}" for item, price in order_details.items()])
     send_email(user.email, CREATOR_EMAIL, order_details_str)
     
     return render_template('success.html', user=user)
