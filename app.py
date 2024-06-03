@@ -215,9 +215,9 @@ def update_user():
 SMTP_SERVER = os.getenv('SERVER')
 SMTP_PORT = 587
 SMTP_USERNAME = os.getenv('USERNAME')
-SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
+SMTP_PASSWORD = os.getenv('SMTP-PASSWORD')
 FROM_EMAIL = os.getenv('EMAIL')
-CREATOR_EMAIL = os.getenv("EMAIL")
+CREATOR_EMAIL = os.getenv('EMAIL')
 
 def send_email(user_email, creator_email, order_details):
     message = MIMEMultipart()
