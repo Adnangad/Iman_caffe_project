@@ -212,12 +212,12 @@ def update_user():
     user.save()
     return jsonify({"message": "You have successfully updated your details"})
 
-SMTP_SERVER = 'smtp.mailgun.org'
+SMTP_SERVER = ''
 SMTP_PORT = 587
-SMTP_USERNAME = 'postmaster@sandboxabdacdfdde0b4a70bc967ee39499e79b.mailgun.org'
-SMTP_PASSWORD = '4a6ea5456167ad6b26401b37432c6199-0996409b-c1af1b6d'
-FROM_EMAIL = 'adnanobuya@gmail.com'
-CREATOR_EMAIL = 'adnanobuya@gmail.com'
+SMTP_USERNAME = ''
+SMTP_PASSWORD = ''
+FROM_EMAIL = os.getenv('EMAIL')
+CREATOR_EMAIL = os.getenv("EMAIL")
 
 def send_email(user_email, creator_email, order_details):
     message = MIMEMultipart()
