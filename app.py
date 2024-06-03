@@ -212,10 +212,10 @@ def update_user():
     user.save()
     return jsonify({"message": "You have successfully updated your details"})
 
-SMTP_SERVER = ''
+SMTP_SERVER = os.getenv('SERVER')
 SMTP_PORT = 587
-SMTP_USERNAME = ''
-SMTP_PASSWORD = ''
+SMTP_USERNAME = os.getenv('USERNAME')
+SMTP_PASSWORD = os.getenv('SMTP_PASSWORD')
 FROM_EMAIL = os.getenv('EMAIL')
 CREATOR_EMAIL = os.getenv("EMAIL")
 
