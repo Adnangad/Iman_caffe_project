@@ -71,3 +71,7 @@ class DBStorage:
     def close(self):
         """call remove() method on the private session attribute"""
         self.__session.remove()
+    
+    def rollback(self):
+        """Rolls back the current session"""
+        self.__session.rollback()
