@@ -15,7 +15,7 @@
       const greet = '<li><a href="/user" class="iconz" id="user"><i class="fa-solid fa-user"></i>Hi {{ user.name }}</a></li>'
       $('#home').parent().replaceWith(greet)
       {% else %}
-      const temp_but = '<button class="cartButton" onclick="window.location.href=\'/\'">Add to cart<i class="fa-solid fa-cart-shopping"></i></button>'
+      const temp_but = '<button id="addtocart" class="cartButton" onclick="window.location.href=\'/\'">Add to cart<i class="fa-solid fa-cart-shopping"></i></button>'
       $('#addtocart').parent().replaceWith(temp_but)
       {% endif %}
     });
