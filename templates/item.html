@@ -14,6 +14,9 @@
       $('#log').parent().replaceWith(temp);
       const greet = '<li><a href="/user" class="iconz" id="user"><i class="fa-solid fa-user"></i>Hi {{ user.name }}</a></li>'
       $('#home').parent().replaceWith(greet)
+      {% else %}
+      const temp_but = '<button href="/menu" class="cartButton">Add to cart<i class="fa-solid fa-cart-shopping"></i></button>'
+      $('#addtocart').parent().replaceWith(temp_but)
       {% endif %}
     });
 
