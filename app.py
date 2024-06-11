@@ -111,7 +111,6 @@ def add_to_cart():
         storage.new(cart_item)
         storage.save()
         number_of_items = sum(1 for cart in storage.all(Cart).values() if cart.user_id == user_id and cart.item == cart_item.item)
-        number_of_items = str(number_of_items)
         return jsonify({'message': 'Item added to cart successfully', 'number_of_items': number_of_items, 'cart_item': cart_item.id}), 200
     except SQLAlchemyError as e:
         storage.rollback()
@@ -121,25 +120,21 @@ def add_to_cart():
 def remove_from_cart(cart_id):
     """Removes an item from the cart"""
     try:
-        cartz = storage.get(Cart, cart_id)
-        if cartz is None:
+        cart_item = storage.get(Cart, cart_id)
+        if cart_item is None:
             return jsonify({'message': 'Not found'}), 400
-        storage.delete(cartz)    
+        storage.delete(cart_item)
         storage.save()
         if 'user_id' not in session:
             return jsonify({'message': 'Please login.'}), 401    
         user_id = session['user_id']
         user = storage.get(User, user_id)
-        carts = sorted(list(storage.all(Cart).values()), key=lambda x: x.item)
-        number_of_items = 0
-        for cart in carts:
-            if cart.user_id == user.id and cart.id == cart_id:
-                number_of_items = number_of_items + 1
-        number_of_items = str(number_of_items)
-        return jsonify({'message': 'Item added to cart successfully', 'number_of_items': number_of_items}), 200
+        number_of_items = sum(1 for cart in storage.all(Cart).values() if cart.user_id == user_id and cart.item == cart_item.item)
+        return jsonify({'message': 'Item removed from cart successfully', 'number_of_items': number_of_items}), 200
     except SQLAlchemyError as e:
         storage.rollback()
         return jsonify({'message': str(e)}), 500
+
 
 @app.route("/menu", methods=['GET'], strict_slashes=False)
 def get_menu():
