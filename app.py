@@ -17,13 +17,21 @@ from sqlalchemy.exc import SQLAlchemyError
 app = Flask(__name__)
 app.secret_key = 'your_secret_key'
 cache_id = uuid4()
+SMTP_SERVER = os.getenv('SERVER')
+SMTP_PORT = 587
+SMTP_USERNAME = os.getenv('USERNAME')
+SMTP_PASSWORD = os.getenv('SMTP-PASSWORD')
+FROM_EMAIL = os.getenv('EMAIL')
+CREATOR_EMAIL = os.getenv('EMAIL')
 
 @app.route("/", strict_slashes=False)
 def index():
+    """Returns the home page"""
     return render_template("index.html", cache_id=cache_id)
 
 @app.route("/location", methods=['POST'])
 def check_Area():
+    """Checks if the entered location  is within the database"""
     try:
         area = storage.all(Area).values()
         data = request.get_json()
@@ -40,10 +48,12 @@ def check_Area():
 
 @app.route('/moreinfo', methods=["GET"])
 def get_inf():
+    """Renders the template inf.html"""
     return render_template("inf.html")
 
 @app.route("/login", methods=["POST"])
 def sign_in():
+    """Checks if the user exists in the databse"""
     try:
         data = request.get_json()
         if not data:
@@ -64,6 +74,7 @@ def sign_in():
 
 @app.route("/sign_up", methods=['POST'])
 def sign_up():
+    """Adds a users to the database"""
     try:
         data = request.get_json()
         if not data:
@@ -83,6 +94,7 @@ def sign_up():
 
 @app.route("/add_to_cart", methods=['POST'])
 def add_to_cart():
+    """Adds an item to the cart"""
     if 'user_id' not in session:
         return jsonify({'message': 'Please login.'}), 401    
     try:
@@ -107,6 +119,7 @@ def add_to_cart():
 
 @app.route('/remove_item/<cart_id>', methods=['DELETE'])
 def remove_from_cart(cart_id):
+    """Removes an item from the cart"""
     try:
         cartz = storage.get(Cart, cart_id)
         if cartz is None:
@@ -130,6 +143,7 @@ def remove_from_cart(cart_id):
 
 @app.route("/menu", methods=['GET'], strict_slashes=False)
 def get_menu():
+    """Renders the menu page"""
     try:
         page = request.args.get('page', 1, type=int)
         limit = request.args.get('limit', 10, type=int)
@@ -152,6 +166,7 @@ def get_menu():
 
 @app.route("/menu/<category>", methods=['GET'], strict_slashes=False)
 def get_menu_cat(category):
+    """Returns the menu page with the selected category"""
     try:
         stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
         if 'user_id' not in session:
@@ -176,6 +191,7 @@ def get_menu_cat(category):
 
 @app.route('/checkitem/<stock_id>')
 def check_item(stock_id):
+    """Returns an item"""
     try:
         stock = storage.get(Stock, stock_id)
         stocks = sorted(list(storage.all(Stock).values()), key=lambda x: x.product)
@@ -190,6 +206,7 @@ def check_item(stock_id):
 
 @app.route("/cart", methods=["GET"])
 def show_cart():
+    """Returns the cart page witha list of items in the cart"""
     if 'user_id' not in session:
         return jsonify({'message': 'Please login.'}), 401
     try:
@@ -214,6 +231,7 @@ def show_cart():
 
 @app.route('/user/', methods=['GET'])
 def user_info():
+    """Navigates to the user account page"""
     if 'user_id' not in session:
         return jsonify({'message': 'User does not exist'}), 400
     try:
@@ -232,6 +250,7 @@ def log_out():
 
 @app.route('/delete_user', methods=['DELETE'])
 def delete_user():
+    """Deletes a user from the database"""
     try:
         user_id = session['user_id']
         user = storage.get(User, user_id)
@@ -245,6 +264,7 @@ def delete_user():
 
 @app.route('/update_user', methods=['PUT'])
 def update_user():
+    """Updates the users details"""
     try:
         user_id = session['user_id']
         user = storage.get(User, user_id)
@@ -260,14 +280,8 @@ def update_user():
         storage.rollback()
         return jsonify({'message': str(e)}), 500
 
-SMTP_SERVER = os.getenv('SERVER')
-SMTP_PORT = 587
-SMTP_USERNAME = os.getenv('USERNAME')
-SMTP_PASSWORD = os.getenv('SMTP-PASSWORD')
-FROM_EMAIL = os.getenv('EMAIL')
-CREATOR_EMAIL = os.getenv('EMAIL')
-
 def send_email(user_email, creator_email, order_details):
+    """Sends mail"""
     message = MIMEMultipart()
     message['From'] = FROM_EMAIL
     message['To'] = ', '.join([user_email, creator_email])
@@ -288,6 +302,7 @@ def send_email(user_email, creator_email, order_details):
 
 @app.route('/payment', methods=['POST'])
 def mobile_payment():
+    """Calls the method send_mail"""
     if 'user_id' not in session:
         return jsonify({'message': 'Please login.'}), 401
     try:
