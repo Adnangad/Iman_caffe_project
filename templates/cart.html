@@ -1,61 +1,141 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product Page</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles/checkout.css') }}?cache_id={{ cache_id }}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer">
-    <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
-    <script>
-        // Add your JavaScript here if necessary
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Product Page</title>
+        <link rel="stylesheet"
+            href="{{ url_for('static', filename='styles/checkout.css') }}?cache_id={{ cache_id }}">
+        <link rel="stylesheet"
+            href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
+            integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A=="
+            crossorigin="anonymous" referrerpolicy="no-referrer">
+        <script src="https://code.jquery.com/jquery-3.2.1.min.js"></script>
+        <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.addButton').forEach(button => {
+                button.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const productElement = e.target.closest('.product');
+                    const item_name = productElement.querySelector('.item').textContent.trim();
+                    const value_price = productElement.querySelector('.price').textContent.trim();
+                    const value = parseFloat(value_price.replace('Ksh', "").replace('.00', ""));
+                    const image_path = productElement.querySelector('img').src.trim();
+                    const image = image_path.split('/static/')[1];
+
+                    try {
+                        const response = await fetch('/add_to_cart', {
+                            method: 'POST',
+                            headers: {'Content-Type': 'application/json'},
+                            body: JSON.stringify({item: item_name, price: value, image: image}),
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const cart_id = data.cart_item;
+                            productElement.querySelector('.addButton').style.display = 'none';
+                            const removeButton = productElement.querySelector('.removeButton');
+                            removeButton.style.display = 'inline-block';
+                            removeButton.dataset.cartId = cart_id;
+                            updateQuantityAndTotal(data);
+                        }
+                    } catch (error) {
+                        console.error('Error adding item to cart:', error);
+                    }
+                });
+            });
+
+            document.querySelectorAll('.removeButton').forEach(button => {
+                button.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const cart_id = e.target.dataset.cartId;
+
+                    try {
+                        const response = await fetch('/remove_item/' + cart_id, {
+                            method: 'DELETE',
+                            headers: {'Content-Type': 'application/json'},
+                        });
+
+                        if (response.ok) {
+                            const data = await response.json();
+                            const productElement = e.target.closest('.product');
+                            productElement.querySelector('.removeButton').style.display = 'none';
+                            productElement.querySelector('.addButton').style.display = 'inline-block';
+                            updateQuantityAndTotal(data);
+                        }
+                    } catch (error) {
+                        console.error('Error removing item from cart:', error);
+                    }
+                });
+            });
+
+            function updateQuantityAndTotal(data) {
+                // Update the quantity and subtotal displayed on the page
+                document.querySelector('.num-item').textContent = 'Quantity: ' + data.new_quantity;
+                document.querySelector('.amnt h3').textContent = 'Subtotal: Ksh' + data.new_total;
+            }
+        });
     </script>
-</head>
-<body>
-    <header>
-        <div class="logo"></div>
-        <section class="navbar">
-            <ul class="navbarContent">
-                <li><a href="/menu">Menu</a></li>
-                <li><a href="/user"><i class="fa-solid fa-user"></i>Account</a></li>
-                <li><a href="/logout">Logout</a></li>
-            </ul>
-        </section>
-    </header>
-    <div class="cart_menu">
-        <div class="content">
-            {% for item_name, item_data in grouped_carts.items() %}
-            <div class="product">
-                <img src="{{ url_for('static', filename=item_data.details.image) }}" alt="{{ item_name }}" id="image">
-                <div class="item-content">
-                    <h2 class="item" id="item">{{ item_name }}</h2>
-                    <h6 class="price" id="price">Ksh{{ item_data.details.price }}</h6>
-                    <button id="cartButton" class="cart">-</button>
-                    <p class="num-item">Quantity: {{ item_data.count }}</p>
-                    <p id="cart_id" style="display: none">{{ item_data.details.id }}</p>
-                    <button id="addButton" class="cart" onclick="add_to_db('{{ item_name }}', '{{ item_data.details.price }}', '{{ item_data.details.image }}')">+</button>
+    </head>
+    <body>
+        <header>
+            <div class="logo"></div>
+            <section class="navbar">
+                <ul class="navbarContent">
+                    <li><a href="/menu">Menu</a></li>
+                    <li><a href="/user"><i class="fa-solid fa-user"></i>
+                            Account</a></li>
+                    <li><a href="/logout">Logout</a></li>
+                </ul>
+            </section>
+        </header>
+        <main>
+            <div class="cart_menu">
+                <div class="content">
+                    {% for item_name, item_data in grouped_carts.items() %}
+                    <div class="product">
+                        <img
+                            src="{{ url_for('static', filename=item_data.details.image) }}"
+                            alt="{{ item_name }} image" class="product-image">
+                        <div class="item-content">
+                            <h2 class="item">{{ item_name }}</h2>
+                            <h6 class="price">Ksh{{ item_data.details.price
+                                }}</h6>
+                            <button class="removeButton cart"
+                                style="display:none;">-</button>
+                            <p class="num-item">Quantity: {{ item_data.count
+                                }}</p>
+                            <button class="addButton cart">+</button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                    <div class="amnt">
+                        <h3>Subtotal: Ksh{{ total_price }}</h3>
+                    </div>
                 </div>
             </div>
-            {% endfor %}
-            <div class="amnt">
-                <h3>Subtotal: Ksh{{ total_price }}</h3>
+            <div class="payment_menu">
+                <div class="mpesa_image">
+                    <img
+                        src="{{ url_for('static', filename='images/mpesa.png') }}"
+                        alt="M-Pesa logo">
+                </div>
+                <div class="form">
+                    <form action="/payment" method="post">
+                        <label for="phone">Phone Number:</label>
+                        <input type="number" name="phone" id="phone" required
+                            placeholder="Please Enter your Phone number"
+                            class="pay">
+                        <label for="name">First Name:</label>
+                        <input type="text" name="name" id="name" required
+                            placeholder="Please Enter your name" class="pay">
+                        <input type="hidden" name="amount"
+                            value="{{ total_price }}">
+                        <button type="submit"
+                            class="payButton">Checkout</button>
+                    </form>
+                </div>
             </div>
-        </div>
-    </div>
-    <div class="payment_menu">
-        <div class="mpesa_image">
-            <img src="../static/images/mpesa.png" alt="mpesa_logo">
-        </div>
-        <div class="form">
-            <form action="/payment" method="post">
-                <label for="phone">Phone Number:</label>
-                <input type="number" name="phone" required placeholder="Please Enter your Phone number" class="pay"><br>
-                <label for="name">First Name :</label>
-                <input type="text" name="name" required placeholder="Please Enter your name" class="pay"><br>
-                <input type="hidden" name="amount" value="{{ total_price }}">
-                <button type="submit" class="payButton">Checkout</button>
-            </form>
-        </div>
-    </div>
-</body>
+        </main>
+    </body>
 </html>
