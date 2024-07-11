@@ -1,3 +1,6 @@
+"""
+This module adds items to the database for consumers to choose.
+"""
 from models.stock import Stock
 from models import storage
 
