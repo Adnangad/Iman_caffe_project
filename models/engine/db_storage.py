@@ -15,7 +15,7 @@ class DBStorage:
     
     def __init__(self):
         """creates engine and instanciates"""
-        database_url = os.getenv('JAWSDB_URL')
+        database_url = os.getenv('DATABASE_URL')
         self.__engine = create_engine(database_url)
     
     def all(self, cls=None):
