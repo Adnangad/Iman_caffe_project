@@ -2,3 +2,6 @@ flask
 sqlalchemy
 mysqlclient
 requests
+gunicorn==23.0.0
+packaging==24.2
+psycopg2==2.9.10
